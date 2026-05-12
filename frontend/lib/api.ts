@@ -438,3 +438,29 @@ export interface LeaderboardEntry {
   questions_solved: number;
   last_submission_at: string | null;
 }
+
+// ─── Site Settings ───────────────────────────────────────────────────────────
+
+export interface SiteSettings {
+  site_name: string;
+  about_text: string;
+  terms_text: string;
+  privacy_text: string;
+  contact_email: string;
+  contact_phone: string;
+  contact_address: string;
+  updated_at: string;
+}
+
+export const settingsApi = {
+  get() {
+    return apiFetch<SiteSettings>("/settings/");
+  },
+
+  update(data: Partial<SiteSettings>) {
+    return apiFetch<SiteSettings>("/settings/", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+};

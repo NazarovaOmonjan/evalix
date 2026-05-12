@@ -4,7 +4,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import (
     User, Contest, ContestParticipant, Question,
-    Submission, Score, LeaderboardEntry
+    Submission, Score, LeaderboardEntry, SiteSettings
 )
 
 
@@ -267,3 +267,15 @@ class LeaderboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaderboardEntry
         fields = ["rank", "user", "total_score", "questions_solved", "last_submission_at"]
+
+
+# ─── Site Settings ────────────────────────────────────────────────────────────
+
+class SiteSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteSettings
+        fields = [
+            "site_name", "about_text", "terms_text", "privacy_text",
+            "contact_email", "contact_phone", "contact_address", "updated_at"
+        ]
+        read_only_fields = ["updated_at"]

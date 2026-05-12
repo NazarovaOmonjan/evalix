@@ -30,7 +30,7 @@ import {
 import { useState, useEffect } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { useAuth } from "@/lib/auth-context"
-import { contestApi, questionApi, adminApi, Contest, Question, AdminUser } from "@/lib/api"
+import { contestApi, questionApi, adminApi, settingsApi, Contest, Question, AdminUser, SiteSettings } from "@/lib/api"
 import { toast } from "sonner"
 import type { ApiError } from "@/lib/api"
 
@@ -52,21 +52,49 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
+    site_name: "Evalix",
+    about_text: "",
+    terms_text: "",
+    privacy_text: "",
+    contact_email: "",
+    contact_phone: "",
+    contact_address: "",
+    updated_at: "",
+  })
+
   const { t } = useLanguage()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (!authLoading && user?.role === "admin") {
+      loadData()
+    }
+  }, [user, authLoading])
+
+  // Only admin can access this page
+  if (!authLoading && (!user || user.role !== "admin")) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <p className="text-muted-foreground">Access denied. Admin only.</p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   const loadData = async () => {
     try {
-      const [contestsData, usersData] = await Promise.all([
+      const [contestsData, usersData, settingsData] = await Promise.all([
         contestApi.list().catch(() => ({ results: [] })),
         adminApi.listUsers().catch(() => ({ results: [] })),
+        settingsApi.get().catch(() => null),
       ])
       setContests(contestsData.results)
       setUsers(usersData.results)
+      if (settingsData) setSiteSettings(settingsData)
 
       // Load questions for all contests
       if (contestsData.results.length > 0) {
@@ -474,20 +502,121 @@ export default function AdminPage() {
             </TabsContent>
 
             {/* Settings Tab */}
-            <TabsContent value="settings">
+            <TabsContent value="settings" className="space-y-6">
+              {/* Site Name */}
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-foreground">{t("admin.tabs.settings")}</CardTitle>
-                  <CardDescription>{t("admin.subtitle")}</CardDescription>
+                  <CardTitle className="text-foreground">Platform Name</CardTitle>
+                  <CardDescription>Change the name of your platform</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-foreground">Platform Name</Label>
-                    <Input defaultValue="Evalix" className="bg-input border-border" />
-                  </div>
-                  <Button disabled>{t("admin.save")}</Button>
+                  <Input
+                    value={siteSettings.site_name}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, site_name: e.target.value })}
+                    className="bg-input border-border"
+                  />
                 </CardContent>
               </Card>
+
+              {/* About */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">About Us</CardTitle>
+                  <CardDescription>Information about your platform</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    value={siteSettings.about_text}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, about_text: e.target.value })}
+                    placeholder="Write about your platform..."
+                    className="bg-input border-border min-h-[150px]"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Terms */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Terms & Conditions</CardTitle>
+                  <CardDescription>Terms of service for users</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    value={siteSettings.terms_text}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, terms_text: e.target.value })}
+                    placeholder="Write your terms and conditions..."
+                    className="bg-input border-border min-h-[150px]"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Privacy */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Privacy Policy</CardTitle>
+                  <CardDescription>Privacy policy for users</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    value={siteSettings.privacy_text}
+                    onChange={(e) => setSiteSettings({ ...siteSettings, privacy_text: e.target.value })}
+                    placeholder="Write your privacy policy..."
+                    className="bg-input border-border min-h-[150px]"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Contacts */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Contact Information</CardTitle>
+                  <CardDescription>How users can reach you</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-foreground">Email</Label>
+                      <Input
+                        type="email"
+                        value={siteSettings.contact_email}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, contact_email: e.target.value })}
+                        placeholder="contact@evalix.com"
+                        className="bg-input border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-foreground">Phone</Label>
+                      <Input
+                        value={siteSettings.contact_phone}
+                        onChange={(e) => setSiteSettings({ ...siteSettings, contact_phone: e.target.value })}
+                        placeholder="+998 90 123 45 67"
+                        className="bg-input border-border"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Address</Label>
+                    <Textarea
+                      value={siteSettings.contact_address}
+                      onChange={(e) => setSiteSettings({ ...siteSettings, contact_address: e.target.value })}
+                      placeholder="Your address..."
+                      className="bg-input border-border"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Save Button */}
+              <Button className="w-full md:w-auto" onClick={async () => {
+                try {
+                  await settingsApi.update(siteSettings)
+                  toast.success("Settings saved successfully!")
+                } catch {
+                  toast.error("Failed to save settings.")
+                }
+              }}>
+                {t("admin.save")}
+              </Button>
             </TabsContent>
           </Tabs>
         </div>

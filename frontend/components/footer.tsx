@@ -35,16 +35,16 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-foreground">{t("footer.about")}</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.about")}</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.contact")}</Link></li>
+              <li><Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.about")}</Link></li>
+              <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.contact")}</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-sm font-semibold text-foreground">{t("footer.terms")}</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.privacy")}</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.terms")}</Link></li>
+              <li><Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.privacy")}</Link></li>
+              <li><Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">{t("footer.terms")}</Link></li>
             </ul>
           </div>
         </div>

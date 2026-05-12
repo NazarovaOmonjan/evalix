@@ -10,6 +10,7 @@ from .views import (
     SubmissionViewSet,
     ScoreViewSet,
     JudgeDashboardView,
+    SiteSettingsView,
 )
 
 router = DefaultRouter()
@@ -33,6 +34,9 @@ urlpatterns = [
 
     # ── Judge ─────────────────────────────────────────────────────────────────
     path("judge/dashboard/", JudgeDashboardView.as_view(), name="judge-dashboard"),
+
+    # ── Site Settings ─────────────────────────────────────────────────────────
+    path("settings/", SiteSettingsView.as_view(), name="site-settings"),
 
     # ── Resources (router) ────────────────────────────────────────────────────
     path("", include(router.urls)),

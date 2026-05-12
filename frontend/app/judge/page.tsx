@@ -37,11 +37,26 @@ export default function JudgePanelPage() {
   const [feedback, setFeedback] = useState("")
   const [scoreLoading, setScoreLoading] = useState(false)
   const { t } = useLanguage()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
 
   useEffect(() => {
-    loadSubmissions()
-  }, [])
+    if (!authLoading && user && (user.role === "judge" || user.role === "admin")) {
+      loadSubmissions()
+    }
+  }, [user, authLoading])
+
+  // Only judge or admin can access
+  if (!authLoading && (!user || (user.role !== "judge" && user.role !== "admin"))) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <p className="text-muted-foreground">Access denied. Judge or Admin only.</p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   const loadSubmissions = async () => {
     try {

@@ -138,3 +138,32 @@ class LeaderboardEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.contest.title} - Score: {self.total_score}"
+
+
+class SiteSettings(models.Model):
+    """Singleton model for site-wide settings editable by admin."""
+    site_name = models.CharField(max_length=100, default="Evalix")
+    about_text = models.TextField(blank=True, default="")
+    terms_text = models.TextField(blank=True, default="")
+    privacy_text = models.TextField(blank=True, default="")
+    contact_email = models.EmailField(blank=True, default="")
+    contact_phone = models.CharField(max_length=50, blank=True, default="")
+    contact_address = models.TextField(blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Site Settings"
+        verbose_name_plural = "Site Settings"
+
+    def __str__(self):
+        return self.site_name
+
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

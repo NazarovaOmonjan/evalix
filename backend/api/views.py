@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .models import Contest, ContestParticipant, Question, Submission, Score, LeaderboardEntry
+from .models import Contest, ContestParticipant, Question, Submission, Score, LeaderboardEntry, SiteSettings
 from .permissions import (
     IsAdmin, IsJudge, IsAdminOrJudge, IsStudent,
     IsAdminOrReadOnly, IsOwnerOrAdminOrJudge, IsScoreOwnerOrAdmin
@@ -20,6 +20,7 @@ from .serializers import (
     SubmissionSerializer,
     ScoreReadSerializer, ScoreWriteSerializer,
     LeaderboardSerializer,
+    SiteSettingsSerializer,
 )
 
 User = get_user_model()
@@ -304,3 +305,28 @@ class JudgeDashboardView(APIView):
                 "submissions": SubmissionSerializer(pending, many=True, context={"request": request}).data,
             }
         )
+
+
+# ─── Site Settings ────────────────────────────────────────────────────────────
+
+class SiteSettingsView(APIView):
+    """
+    GET — anyone can read site settings (public)
+    PATCH — admin only can update
+    """
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsAdmin()]
+
+    def get(self, request):
+        settings = SiteSettings.get()
+        return Response(SiteSettingsSerializer(settings).data)
+
+    def patch(self, request):
+        settings = SiteSettings.get()
+        serializer = SiteSettingsSerializer(settings, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
