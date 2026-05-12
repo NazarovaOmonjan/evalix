@@ -16,7 +16,7 @@ if env_path.exists():
 
 # ─── Core Settings ────────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-change-me-in-production")
-DEBUG = os.environ.get("DEBUG", "True").lower() in ("true", "1", "yes")
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
